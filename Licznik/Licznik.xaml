@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Licznik.Licznik"
+             Title="Licznik">
+    <ScrollView>
+        <VerticalStackLayout
+        Padding="30,0"
+        Spacing="25">
+
+            <Label
+                x:Name="nameLabel"
+                Text=""
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1" />
+
+            <Label
+                x:Name="valueLabel"
+                Text=""
+                Style="{StaticResource Headline}"
+                TextColor="#ffffff"
+                SemanticProperties.HeadingLevel="Level1" /> 
+
+
+            <Button
+            x:Name="AddBtn"
+            Text="Dodaj 1" 
+            Clicked="OnAddClicked"/>
+            <Button
+            x:Name="SubBtn"
+            Text="Odejmij 1" 
+            Clicked="OnSubsractClicked"/>
+            <Button
+             x:Name="ResteBtn"
+             Text="Zresetuj licznik" 
+             Clicked="OnResetClicked"/>
+            <Button
+             x:Name="DeleteBtn"
+             Text="Usuń Licznik" 
+             Clicked="OnDeleteClicked"/>
+
+
+            <Label
+            x:Name="label1"
+            Text=""
+            Style="{StaticResource Headline}"
+            FontSize="Small" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

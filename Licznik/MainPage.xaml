@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Licznik.MainPage">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="30,0"
+            Spacing="25">
+
+            <Label
+                Text="Dodaj nowy licznik!"
+                Style="{StaticResource Headline}"
+                SemanticProperties.HeadingLevel="Level1" />
+            
+            <Entry x:Name="entryNameValue" Placeholder="Unikalna nazwa Licznika"/>
+            <Entry x:Name="entryDefaultValue" Placeholder="Wartość początkowa licznika"/>
+            <Entry x:Name="entryColor" Placeholder="Kolor licznika (np. #ff0000)"/>
+
+            <Button
+                x:Name="CounterBtn"
+                Text="Dodaj Licznik" 
+                Clicked="OnCounterClicked"/>
+            <Label
+                x:Name="infoText"
+                Text=""
+                Style="{StaticResource Headline}"
+                FontSize="Small" />
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
