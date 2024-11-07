@@ -24,8 +24,7 @@
 
             if (Items[0] is TabBar tabBar)
             {
-                tabBar.Items.Add(newShellContent);
-              
+                tabBar.Items.Add(newShellContent);   
             }
         }
 
@@ -33,6 +32,5 @@
         {
             Items[0].Items.Remove(Items[0].Items.FirstOrDefault(item => item.Title == title));
         }
-    
     }
 }

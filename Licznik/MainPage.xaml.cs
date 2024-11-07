@@ -1,13 +1,15 @@
 ﻿using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Xml.Serialization;
 
 namespace Licznik
 {
     public partial class MainPage : ContentPage
     {
-        public static List<string> counterNames = new List<string>();
-        public static List<string> counterDatas = new List<string>();
+        public static string FolderDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Licznik\\";
+        public static string FileDir = "data.xml";
+        public static List<Models.LicznikModel> SavedCounters = new List<Models.LicznikModel> ();
 
         public MainPage()
         {
@@ -17,45 +19,48 @@ namespace Licznik
 
         private void LoadData()
         {
-            string FolderDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Licznik\\";
-            string FileDir = "data.json";
-
             if (!Directory.Exists(FolderDir))
             {
                 Directory.CreateDirectory(FolderDir);
             }
-
             if (!File.Exists(FolderDir + FileDir))
             {
-                File.WriteAllText(FolderDir + FileDir, "[]");
+                File.Create(FolderDir + FileDir);
             }
             else 
             {
-                
-                string json = File.ReadAllText(FolderDir + FileDir);
-                json = json.Replace("\n", ""); json = json.Replace("\r", ""); json = json.Replace(" ", ""); json = json.Replace("[", ""); json = json.Replace("]", "");json = json.Replace("\"", ""); json = json.Replace(":", ""); json = json.Replace("counterName", ""); json = json.Replace("defaultValue", ""); json = json.Replace("currentValue", ""); json = json.Replace("color", ""); json = json.Replace("}", "");
-                string[] array1 = json.Split('{');
+                ReadData();
 
-                foreach (string element in array1)
+                foreach(Models.LicznikModel element in SavedCounters)
                 {
-                    string[] array2 = element.Split(',');
-                    counterNames.Add(array2[0]);
-                    counterDatas.Add(element);
-                    
-                }
-                counterNames.RemoveAt(0);
-                counterDatas.RemoveAt(0);
-
-                foreach(string element in counterDatas)
-                {
-                    string[] dataArr = element.Split(',');
-
                     if (App.Current.MainPage is AppShell shell)
                     {
-                        shell.AddNewShellContent(dataArr[0], int.Parse(dataArr[1]), int.Parse(dataArr[2]), dataArr[3]);
+                        shell.AddNewShellContent(element._counterName, element._defaultValue, element._currentValue, element._color);
                     }
                 }
             }
+        }
+
+        public static void WriteData()
+        {
+            XmlSerializer serializer = new XmlSerializer(typeof(List<Models.LicznikModel>));
+            using (FileStream fileStream = new FileStream(FolderDir + FileDir, FileMode.Create))
+            {
+                serializer.Serialize(fileStream, SavedCounters);
+            }
+        }
+
+        public static void ReadData()
+        {
+            try
+            {
+                XmlSerializer serializer = new XmlSerializer(typeof(List<Models.LicznikModel>));
+                using (FileStream fileStream = new FileStream(FolderDir + FileDir, FileMode.Open))
+                {
+                    SavedCounters = (List<Models.LicznikModel>)serializer.Deserialize(fileStream);
+                }
+            }
+            catch { }
         }
 
         private void OnCounterClicked(object sender, EventArgs e)
@@ -68,17 +73,22 @@ namespace Licznik
             color = entryColor.Text;
             counterName = entryNameValue.Text;
 
-            try
+            if (ValidateData(counterName,defaultVal,color))
             {
-                defaultVal = int.Parse(entryDefaultValue.Text);
+                if (App.Current.MainPage is AppShell shell)
+                {
+                    shell.AddNewShellContent(counterName,defaultVal,defaultVal,color);
+                    SavedCounters.Add(new Models.LicznikModel(counterName, defaultVal, defaultVal, color));
+                    WriteData();
+                }
+                infoText.Text = "Pomyślnie dodano nowy licznik!";
             }
-            catch { validationChallange = false; infoText.Text = "Podano niepoprawne dane!"; }
+        }
 
-            if (color != null && defaultVal != null && counterName != null) { color = color.ToUpper(); } else 
-            {
-                validationChallange = false;
-                color = string.Empty;
-            }
+        private bool ValidateData(string counterName, int defaultVal, string color) 
+        {
+            try { defaultVal = int.Parse(entryDefaultValue.Text); }catch {  infoText.Text = "Podano niepoprawne dane!"; return false; }
+            if (color != null && defaultVal != null && counterName != null) { color = color.ToUpper(); }else{return false;}
 
             int tagCount = 0;
             foreach (char element in color)
@@ -88,36 +98,18 @@ namespace Licznik
 
             if (color.Length == 7 && color[0] == '#' && tagCount == 1)
             {
-                
-
                 foreach (char element in color)
                 {
-                    if (!new List<char>() {'#','0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'}.Contains(element)) { validationChallange = false; infoText.Text = "Podano niepoprawne dane!"; break; };
+                    if (!new List<char>() { '#', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' }.Contains(element)) {infoText.Text = "Podano niepoprawne dane!"; return false; };
                 }
             }
-            else { validationChallange = false; infoText.Text = "Podano niepoprawne dane!"; }
+            else { infoText.Text = "Podano niepoprawne dane!"; return false; }
 
-            if (counterNames.Contains(counterName)) { validationChallange = false; infoText.Text = "Licznik o tej nazwie już isnieje!"; }
-
-            if (validationChallange)
+            foreach (Models.LicznikModel element in SavedCounters)
             {
-                if (App.Current.MainPage is AppShell shell)
-                {
-                    shell.AddNewShellContent(counterName,defaultVal,defaultVal,color);
-                    counterNames.Add(counterName);
-                    string FolderDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Licznik\\";
-                    string FileDir = "data.json";
-                    string json = File.ReadAllText(FolderDir + FileDir);
-                    string json2 = json.Replace("]", "");
-                    json2 += ",{\"counterName\":\"" + counterName + "\",\"defaultValue\":" + defaultVal.ToString() + ",\"currentValue\":" + defaultVal.ToString() + ",\"color\":\"" + color + "\"}]";
-                    json2 = json2.Replace("[,","[");
-                    File.WriteAllText(FolderDir + FileDir, json2);
-
-                }
-
-                infoText.Text = "Pomyślnie dodano nowy licznik!";
+                if (counterName == element._counterName) { infoText.Text = "Licznik o tej nazwie już isnieje!"; return false; }
             }
+            return true;
         }
     }
-
 }

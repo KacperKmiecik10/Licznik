@@ -49,74 +49,28 @@ public partial class Licznik : ContentPage
     {
         if (App.Current.MainPage is AppShell shell)
         {
-            string FolderDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Licznik\\";
-            string FileDir = "data.json";
-
-            string json = File.ReadAllText(FolderDir + FileDir);
-            string json2 = json.Replace("[", ""); json2 = json2.Replace("]", "");
-            string[] jsonArray = json2.Split('{');
-            for (int i = 0; i < jsonArray.Length; i++)
+            for (int i = 0; i < MainPage.SavedCounters.Count; i++)
             {
-                if (jsonArray[i].Contains("\"counterName\":\"" + _counterName + "\""))
+                if (MainPage.SavedCounters[i]._counterName == this._counterName)
                 {
-                    jsonArray[i] = "";
+                    MainPage.SavedCounters.RemoveAt(i);
+                    MainPage.WriteData();
                 }
             }
-            string saveStr = "";
-            saveStr += "[";
-            foreach (string element in jsonArray)
-            {
-                saveStr += "{";
-                saveStr += element;
-                saveStr += ",";
-            }
-            saveStr += "]";
-            saveStr = saveStr.Replace(",]", "]");
-            saveStr = saveStr.Replace("[{,{", "[");
-            saveStr = saveStr.Replace(",,", ",");
-            saveStr = saveStr.Replace("[\"", "[{\"");
-            saveStr = saveStr.Replace("{,", "{");
-            saveStr = saveStr.Replace("{{", "{");
-            saveStr = saveStr.Replace("[,", "[");
-            saveStr = saveStr.Replace(",{]", "]");
-            
-            File.WriteAllText(FolderDir + FileDir, saveStr);
 
-            MainPage.counterNames.Remove(_counterName);
             shell.RemoveShellContent(_counterName);
         }
     }
 
     private void saveState()
     {
-        string FolderDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Licznik\\";
-        string FileDir = "data.json";
-
-        string json = File.ReadAllText(FolderDir + FileDir);
-        string json2 = json.Replace("[", ""); json2 = json2.Replace("]", "");
-        string[] jsonArray = json2.Split('{');
-        for (int i = 0; i < jsonArray.Length; i++)
+        for (int i = 0; i < MainPage.SavedCounters.Count; i++)
         {
-            if (jsonArray[i].Contains("\"counterName\":\"" + _counterName + "\""))
+            if (MainPage.SavedCounters[i]._counterName == this._counterName)
             {
-                jsonArray[i] = "{\"counterName\":\"" + _counterName + "\",\"defaultValue\":" + _defaultValue + ",\"currentValue\":" + _currentValue + ",\"color\":\"" + _color + "\"}";
+                MainPage.SavedCounters[i]._currentValue = this._currentValue;
+                MainPage.WriteData();
             }
         }
-
-        string saveStr = "";
-        saveStr += "[";
-        foreach (string element in jsonArray)
-        {
-            saveStr += "{";
-            saveStr += element;
-            saveStr += ",";
-        }
-        saveStr += "]";
-        saveStr = saveStr.Replace(",]", "]");
-        saveStr = saveStr.Replace("[{,{", "[");
-        saveStr = saveStr.Replace(",,", ",");
-        saveStr = saveStr.Replace("[\"", "[{\"");
-        saveStr = saveStr.Replace("{{", "{");
-        File.WriteAllText(FolderDir + FileDir, saveStr);
     }
 }
